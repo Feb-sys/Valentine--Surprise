@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Favorite Person</title>
+    <title>A Special Surprise For You</title>
     <style>
         :root {
             --primary-pink: #ff85a2;
@@ -33,6 +33,7 @@
             font-size: 1.5rem;
             animation: float 6s linear infinite;
             z-index: 0;
+            pointer-events: none;
         }
 
         @keyframes float {
@@ -43,49 +44,85 @@
         .container {
             z-index: 10;
             background: white;
-            padding: 2rem;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 90%;
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 85%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
         }
 
-        h1 { color: var(--dark-pink); margin-bottom: 2rem; }
+        h1 { color: var(--dark-pink); margin-bottom: 1.5rem; font-size: 1.8rem; }
 
         .btn-group {
             position: relative;
-            height: 120px;
+            height: 150px;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         button {
             padding: 15px 35px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
             border-radius: 50px;
             border: none;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            touch-action: none;
+            touch-action: none; /* Crucial for mobile performance */
         }
 
         #yesBtn {
             background-color: var(--primary-pink);
             color: white;
             box-shadow: 0 5px 15px rgba(255, 133, 162, 0.4);
+            z-index: 5;
         }
 
         #noBtn {
-            background-color: #eee;
-            color: #777;
+            background-color: #f1f1f1;
+            color: #888;
             position: absolute;
             left: 55%;
         }
 
-        .success-content { display: none; }
-        
+        /* Success Screen Styles */
+        #successScreen {
+            display: none;
+            z-index: 20;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .cupid-container {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #arrow { opacity: 0; }
+
+        .shoot-arrow {
+            animation: fly 0.8s ease-out forwards;
+        }
+
+        @keyframes fly {
+            0% { transform: translateX(0); opacity: 1; }
+            90% { transform: translateX(65px); opacity: 1; }
+            100% { transform: translateX(70px); opacity: 0; }
+        }
+
+        .heart-beat {
+            display: inline-block;
+            animation: beat 0.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes beat {
+            to { transform: scale(1.3); }
+        }
+
         .rose-effect {
             position: fixed;
             pointer-events: none;
@@ -103,10 +140,19 @@
         </div>
     </div>
 
-    <div class="success-content" id="successScreen">
-        <h1 style="font-size: 3rem;">🌹🌹🌹</h1>
-        <h1>Happy Valentines Day!</h1>
-        <p style="color: #f72585; font-size: 1.2rem;">I love you more than words can say.</p>
+    <div id="successScreen">
+        <div class="cupid-container">
+            <svg viewBox="0 0 200 150" width="250" height="150">
+                <text x="10" y="100" font-size="70">👼</text>
+                <text x="130" y="100" font-size="60" id="targetHeart">❤️</text>
+                <g id="arrow">
+                    <line x1="65" y1="85" x2="110" y2="85" stroke="#d32f2f" stroke-width="4" />
+                    <polygon points="110,85 100,78 100,92" fill="#d32f2f" />
+                </g>
+            </svg>
+        </div>
+        <h1 style="font-size: 2.2rem; color: #f72585; margin-top: 0;">Happy Valentines Day my world !</h1>
+        <p style="color: #f72585; font-size: 1.3rem; font-weight: bold;">I love you forever! 🌹</p>
     </div>
 
     <script>
@@ -115,7 +161,7 @@
         const mainContainer = document.getElementById('mainContainer');
         const successScreen = document.getElementById('successScreen');
 
-        // Background Hearts
+        // 1. Generate Floating Hearts Background
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart-bg');
@@ -125,53 +171,46 @@
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 6000);
         }
-        setInterval(createHeart, 400);
+        setInterval(createHeart, 450);
 
-        // Runaway Button Logic
+        // 2. The Runaway "No" Button Logic
         function moveNoButton() {
-            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            const maxX = window.innerWidth - noBtn.offsetWidth - 20;
+            const maxY = window.innerHeight - noBtn.offsetHeight - 20;
+            
+            const newX = Math.max(10, Math.random() * maxX);
+            const newY = Math.max(10, Math.random() * maxY);
+            
             noBtn.style.position = 'fixed';
-            noBtn.style.left = x + 'px';
-            noBtn.style.top = y + 'px';
+            noBtn.style.left = newX + 'px';
+            noBtn.style.top = newY + 'px';
         }
 
         noBtn.addEventListener('mouseover', moveNoButton);
         noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Prevents clicking the "No" button
             moveNoButton();
         });
 
-        // Success Action
+        // 3. The "Yes" Button Logic
         yesBtn.addEventListener('click', () => {
             mainContainer.style.display = 'none';
             successScreen.style.display = 'block';
-            spawnRoses();
+            
+            // Animation sequence for Cupid
+            const arrow = document.getElementById('arrow');
+            const heart = document.getElementById('targetHeart');
+            
+            setTimeout(() => {
+                arrow.classList.add('shoot-arrow'); // Shoot arrow
+                setTimeout(() => {
+                    heart.classList.add('heart-beat'); // Heart starts beating
+                }, 700);
+            }, 600);
+
+            spawnRoses(); // Start rose shower
         });
 
+        // 4. Rose Shower Effect
         function spawnRoses() {
-            for (let i = 0; i < 100; i++) {
-                setTimeout(() => {
-                    const rose = document.createElement('div');
-                    rose.innerHTML = '🌹';
-                    rose.className = 'rose-effect';
-                    rose.style.left = Math.random() * 100 + 'vw';
-                    rose.style.top = '-50px';
-                    rose.style.fontSize = (Math.random() * 20 + 20) + 'px';
-                    
-                    const animation = rose.animate([
-                        { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
-                        { transform: `translateY(110vh) rotate(${Math.random() * 360}deg)`, opacity: 0 }
-                    ], {
-                        duration: Math.random() * 2000 + 3000,
-                        easing: 'linear'
-                    });
-
-                    document.body.appendChild(rose);
-                    animation.onfinish = () => rose.remove();
-                }, i * 150);
-            }
-        }
-    </script>
-</body>
-</html>
+            for (let
